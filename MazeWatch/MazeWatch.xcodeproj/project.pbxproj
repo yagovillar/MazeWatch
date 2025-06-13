@@ -33,7 +33,7 @@
 		099945CC2DFCC96400664C17 /* Exceptions for "MazeWatch" folder in "MazeWatch" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Info.plist,
+				Core/Info.plist,
 			);
 			target = 099945A02DFCC96200664C17 /* MazeWatch */;
 		};
