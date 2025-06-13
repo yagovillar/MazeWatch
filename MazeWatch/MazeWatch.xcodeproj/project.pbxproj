@@ -29,22 +29,9 @@
 		099945C42DFCC96400664C17 /* MazeWatchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MazeWatchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		099945CC2DFCC96400664C17 /* Exceptions for "MazeWatch" folder in "MazeWatch" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Core/Info.plist,
-			);
-			target = 099945A02DFCC96200664C17 /* MazeWatch */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		099945A32DFCC96200664C17 /* MazeWatch */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				099945CC2DFCC96400664C17 /* Exceptions for "MazeWatch" folder in "MazeWatch" target */,
-			);
 			path = MazeWatch;
 			sourceTree = "<group>";
 		};
