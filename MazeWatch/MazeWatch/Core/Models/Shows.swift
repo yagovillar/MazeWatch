@@ -23,6 +23,14 @@ struct Show: Codable {
     }
 }
 
+extension Show {
+    static let mockList: [Show] = [
+        Show(id: 101, name: "Maze Adventures", image: ShowImage(medium: "", original: ""), summary: "First mock show."),
+        Show(id: 102, name: "Mystery Maze", image: ShowImage(medium: "", original: ""), summary: "Second mock show."),
+        Show(id: 103, name: "Watch the Maze", image: ShowImage(medium: "", original: ""), summary: "Third mock show.")
+    ]
+}
+
 struct ShowDetails: Codable {
     let id: Int
     let url: String
