@@ -13,10 +13,14 @@ struct SearchShowItem: Codable {
 }
 
 struct Show: Codable {
-    let id: Int
-    let name: String
+    let id: Int?
+    let name: String?
     let image: ShowImage?
     let summary: String?
+    
+    static func getEmptyShow() -> Show {
+        return Show(id: nil, name: nil, image: nil, summary: nil)
+    }
 }
 
 struct ShowDetails: Codable {
