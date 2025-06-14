@@ -8,6 +8,28 @@ import UIKit
 
 class HomeListViewController: UIViewController {
     var ViewModel: HomeListViewModelProtocol
+    private var isLoading = false
+    private let homeListView = HomeListView()
+    
+    override func loadView() {
+        self.view = homeListView
+        
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        homeListView.showTalbeView.delegate = self
+        homeListView.showTalbeView.dataSource = self
+        homeListView.showTalbeView.register(ShowListCell.self, forCellReuseIdentifier: "ShowCell")
+
+        self.ViewModel.fetchShows()
+        title = "Home"
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.homeListView.showTalbeView.reloadData()
+    }
     
     init(ViewModel: HomeListViewModelProtocol) {
         self.ViewModel = ViewModel
@@ -18,15 +40,16 @@ class HomeListViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        self.ViewModel.fetchShows()
-        title = "Home"
-    }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+    private func loadMoreShows() {
+        guard !isLoading else { return }
+        isLoading = true
+        
+        self.ViewModel.fetchShows()
+        self.homeListView.showTalbeView.reloadData()
+        self.isLoading = false
     }
+
 }
 
 extension HomeListViewController: UITableViewDataSource {
@@ -35,8 +58,27 @@ extension HomeListViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ShowCell", for: indexPath) as! ShowListCell
         let show = ViewModel.getShow(at: indexPath.row)
+        cell.configure(image: UIImage(named: "Image") ?? UIImage(), title: show.name ?? "" , isFavorite: true)
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 140
+    }
+
+}
+
+extension HomeListViewController: UITableViewDelegate {
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let frameHeight = scrollView.frame.size.height
         
-        return UITableViewCell()
+        if offsetY > contentHeight - frameHeight - 100 {
+            loadMoreShows()
+        }
     }
 }

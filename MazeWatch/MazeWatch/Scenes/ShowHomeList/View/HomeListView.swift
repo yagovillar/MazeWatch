@@ -12,15 +12,18 @@ final class HomeListView: UIView {
 
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 24, weight: .bold)
+        label.font = .systemFont(ofSize: 20, weight: .bold)
         label.textAlignment = .left
         label.textColor = .white
+        label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Popular Shows"
         return label
     }()
     
-    private let showTalbeView: UITableView = {
+    let showTalbeView: UITableView = {
         let tableView = UITableView()
+        tableView.backgroundColor = .background
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         return tableView
     }()
@@ -42,21 +45,25 @@ final class HomeListView: UIView {
 
 extension HomeListView: ViewCode {
     func buildViewHierarchy() {
-        addSubview(titleLabel)
         addSubview(showTalbeView)
     }
 
     func setupConstraints() {
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 28),
-            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
-
-            showTalbeView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 28),
-            showTalbeView.centerXAnchor.constraint(equalTo: centerXAnchor)
+            showTalbeView.topAnchor.constraint(equalTo: topAnchor, constant: 28),
+            showTalbeView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
+            showTalbeView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            showTalbeView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
         ])
     }
 
     func setupAdditionalConfiguration() {
         backgroundColor = .background
+        showTalbeView.tableHeaderView = titleLabel
+
     }
+}
+
+#Preview {
+    HomeListView()
 }

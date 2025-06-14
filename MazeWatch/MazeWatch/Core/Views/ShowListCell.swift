@@ -5,108 +5,105 @@
 //  Created by Yago Vanzan on 14/06/25.
 //
 import UIKit
-import SwiftUI
 
 class ShowListCell: UITableViewCell, ViewCode {
-    
+
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 16, weight: .bold)
-        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 18, weight: .semibold)
         label.textColor = .white
-        label.textAlignment = .center
+        label.numberOfLines = 2
+        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
-    private let cellImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.contentMode = .scaleAspectFill
-        return imageView
-    }()
-    
+
     private let favoriteButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(systemName: "star"), for: .normal)
-        button.setImage(UIImage(systemName: "star.fill"), for: .selected)
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.configurationUpdateHandler = { button in
+            var config = UIButton.Configuration.plain()
+            config.image = button.isSelected ? UIImage(systemName: "star.fill") : UIImage(systemName: "star")
+            config.baseForegroundColor = .accent
+            button.configuration = config
+        }
         return button
     }()
-    
+
+    private let cellImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFill
+        imageView.layer.cornerRadius = 10
+        imageView.clipsToBounds = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+
+    private let containerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .fill
+        view.layer.cornerRadius = 16
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupView()
-        super.setNeedsLayout()
-        super.layoutIfNeeded()
+        backgroundColor = .clear
+        selectionStyle = .none
     }
 
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupView()
+        fatalError("init(coder:) has not been implemented")
     }
-    
-    init(image: UIImage, title: String, isFavorite: Bool = false, reuseIdentifier: String?) {
-        super.init(style: .default, reuseIdentifier: reuseIdentifier)
-        setupView()
-        configure(image: image, title: title, isFavorite: isFavorite)
-    }
-    
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
-    }
-    
-    
+
     func buildViewHierarchy() {
-        self.contentView.addSubview(cellImageView)
-        self.contentView.addSubview(titleLabel)
-        self.contentView.addSubview(favoriteButton)
+        contentView.addSubview(containerView)
+        containerView.addSubview(titleLabel)
+        containerView.addSubview(favoriteButton)
+        containerView.addSubview(cellImageView)
     }
-    
+
     func setupConstraints() {
         NSLayoutConstraint.activate([
-            cellImageView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            cellImageView.bottomAnchor.constraint(equalTo: titleLabel.topAnchor),
-            cellImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            cellImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            containerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+            containerView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            containerView.widthAnchor.constraint(equalToConstant: 360),
+            containerView.heightAnchor.constraint(equalToConstant: 120),
 
-            
-            titleLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -9),
-            titleLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            titleLabel.heightAnchor.constraint(equalToConstant: 50),
-            titleLabel.widthAnchor.constraint(equalToConstant: 122),
-            
-            favoriteButton.topAnchor.constraint(equalTo: self.cellImageView.topAnchor, constant: 18),
-            favoriteButton.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -18),
-            favoriteButton.heightAnchor.constraint(equalToConstant: 20),
-            favoriteButton.widthAnchor.constraint(equalToConstant: 20),
-            
-            self.heightAnchor.constraint(equalToConstant: 260),
-            self.widthAnchor.constraint(equalToConstant: 160)
-            ])
+            titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            titleLabel.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            titleLabel.trailingAnchor.constraint(equalTo: favoriteButton.leadingAnchor, constant: -12),
+
+            favoriteButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            favoriteButton.widthAnchor.constraint(equalToConstant: 32),
+            favoriteButton.heightAnchor.constraint(equalToConstant: 32),
+            favoriteButton.trailingAnchor.constraint(equalTo: cellImageView.leadingAnchor, constant: -12),
+
+            cellImageView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
+            cellImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            cellImageView.widthAnchor.constraint(equalToConstant: 80),
+            cellImageView.heightAnchor.constraint(equalToConstant: 100)
+        ])
     }
-    
+
     func setupAdditionalConfiguration() {
-        self.backgroundColor = .fill
-        self.layer.cornerRadius = 20
-        
-        cellImageView.layer.cornerRadius = 20
-        cellImageView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner] // Top left & top right
-        cellImageView.clipsToBounds = true
+        favoriteButton.addAction(UIAction { [weak self] _ in
+            self?.favoriteButton.isSelected.toggle()
+        }, for: .touchUpInside)
     }
-    
-}
 
-extension ShowListCell {
     func configure(image: UIImage, title: String, isFavorite: Bool) {
-        self.cellImageView.image = image
         self.titleLabel.text = title
+        self.cellImageView.image = image
         self.favoriteButton.isSelected = isFavorite
     }
 }
 
-@available(iOS 17, *)
+@available(iOS 17.0, *)
 #Preview {
-    return ShowListCell()
+    let cell = ShowListCell()
+    cell.configure(image: UIImage(named: "Image") ?? UIImage(), title: "The Witcher", isFavorite: true)
+    return cell
 }

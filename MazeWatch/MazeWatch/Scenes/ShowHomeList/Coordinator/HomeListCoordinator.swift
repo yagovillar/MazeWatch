@@ -17,6 +17,9 @@ class HomeListCoordinator: Coordinator {
         let viewController = HomeListViewController(ViewModel: viewModel)
         viewController.title = "Shows"
         navigationController.tabBarItem = UITabBarItem(title: "Shows", image: UIImage(systemName: "tv"), tag: 0)
+        navigationController.navigationBar.titleTextAttributes = [
+            NSAttributedString.Key.foregroundColor: UIColor.white // cor desejada
+        ]
         navigationController.viewControllers = [viewController]
     }
 
