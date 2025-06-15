@@ -30,8 +30,7 @@ class HomeListViewModel: HomeListViewModelProtocol {
     var showList = ShowListModel()
     weak var delegate: HomeListViewModelDelegate?
 
-    init(homeListCoordinatorDelegate: HomeListCoordinatorDelegate? = nil, homeListService: MazeServiceProtocol?) {
-        self.coordinatorDelegate = homeListCoordinatorDelegate
+    init(homeListService: MazeServiceProtocol?) {
         self.service = homeListService
     }
 

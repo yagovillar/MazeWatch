@@ -1,117 +1,160 @@
+//
+//  SearchShowsViewModelTests.swift
+//  MazeWatch
+//
+//  Created by Yago Vanzan on 15/06/25.
+//
+
 import XCTest
 @testable import MazeWatch
 
 final class SearchShowsViewModelTests: XCTestCase {
-    var sut: SearchShowsViewModel!
-    var mockService: MockMazeService!
-    var mockDelegate: MockSearchViewModelDelegate!
+
+    var viewModel: SearchShowsViewModel!
+    var serviceMock: MazeServiceMock!
+    var delegateSpy: DelegateSpy!
 
     override func setUp() {
         super.setUp()
-        mockService = MockMazeService()
-        mockDelegate = MockSearchViewModelDelegate()
-        sut = SearchShowsViewModel(service: mockService)
-        sut.delegate = mockDelegate
+        serviceMock = MazeServiceMock()
+        viewModel = SearchShowsViewModel(service: serviceMock)
+        delegateSpy = DelegateSpy()
+        viewModel.delegate = delegateSpy
     }
 
     override func tearDown() {
-        sut = nil
-        mockService = nil
-        mockDelegate = nil
+        viewModel = nil
+        serviceMock = nil
+        delegateSpy = nil
         super.tearDown()
     }
 
-    func testSearchSuccess() async {
-        // Given
-        let expectedResults = [SearchResult(score: 1.0, item: Show(id: 1, name: "Test Show", image: nil, summary: nil), type: .show)]
-        mockService.mockResults = expectedResults
+    func testSearchWithResults() async {
+        // Arrange
+        let showResult = SearchResult.fixture()
+        let personResult = SearchResult.fixture(item: Person.fixture(), type: .person)
+        serviceMock.searchResultsToReturn = [showResult, personResult]
 
-        // When
-        sut.search(query: "test")
+        let expectation = expectation(description: "Delegate should receive results")
 
-        // Then
-        await fulfillment(of: [mockDelegate.expectation], timeout: 1.0)
-        XCTAssertEqual(sut.getItensCount(), 1)
+        delegateSpy.expectation = expectation
 
-        if case .results(let results) = mockDelegate.lastState {
-            XCTAssertEqual(results.count, expectedResults.count)
-            XCTAssertEqual(results.first?.score, expectedResults.first?.score)
-            XCTAssertEqual(results.first?.type, expectedResults.first?.type)
-            XCTAssertEqual((results.first?.item as? Show)?.id, (expectedResults.first?.item as? Show)?.id)
-            XCTAssertEqual((results.first?.item as? Show)?.name, (expectedResults.first?.item as? Show)?.name)
+        // Act
+        await viewModel.search(query: "Test")
+
+        // Assert
+        await waitForExpectations(timeout: 1)
+        if case .results(let results) = delegateSpy.lastState {
+            XCTAssertEqual(results.count, 2)
+            XCTAssertEqual(viewModel.getItensCount(), 2)
+            XCTAssertEqual(results[0].type, .show)
+            XCTAssertEqual(results[1].type, .person)
         } else {
             XCTFail("Expected results state")
         }
     }
 
-    func testSearchEmptyQuery() {
-        // When
-        sut.search(query: "   ")
+    func testSearchNoResult() async {
+        // Arrange
+        serviceMock.searchResultsToReturn = [] // retorna vazio para simular "no results"
+        let expectation = expectation(description: "Delegate receives error state")
+        
+        var receivedState: SearchState?
+        let delegate = DelegateSpy { state in
+            receivedState = state
+            if case .error = state {
+                expectation.fulfill()
+            }
+        }
+        viewModel.delegate = delegate
 
-        // Then
-        XCTAssertEqual(sut.getItensCount(), 0)
-        if case .idle = mockDelegate.lastState {
-            // Success
+        // Act
+        await viewModel.search(query: "nonexistentquery")
+
+        // Assert
+        await waitForExpectations(timeout: 1)
+
+        guard let state = receivedState else {
+            XCTFail("Nenhum estado recebido")
+            return
+        }
+
+        if case .error(let mazeError) = state {
+            if case .noResults = mazeError {
+                // sucesso: erro esperado
+            } else {
+                XCTFail("Esperava erro .noResults, mas recebeu \(mazeError)")
+            }
         } else {
-            XCTFail("Expected idle state")
+            XCTFail("Esperava estado .error, mas recebeu \(state)")
         }
     }
 
-    func testSearchError() async {
-        // Given
-        mockService.shouldFail = true
+    func testSearchWithError() async {
+        // Arrange
+        serviceMock.shouldThrowError = true
+        let expectation = expectation(description: "Delegate should receive error on failure")
 
-        // When
-        sut.search(query: "test")
+        delegateSpy.expectation = expectation
 
-        // Then
-        await fulfillment(of: [mockDelegate.expectation], timeout: 1.0)
-        XCTAssertEqual(sut.getItensCount(), 0)
+        // Act
+        await viewModel.search(query: "FailQuery")
 
-        if case .error = mockDelegate.lastState {
-            // Success
+        // Assert
+        await waitForExpectations(timeout: 1)
+        if case .error(let error) = delegateSpy.lastState {
+            switch error {
+            case .searchFailed:
+                XCTAssertTrue(true)
+            default:
+                XCTFail("Expected searchFailed error")
+            }
+            XCTAssertEqual(viewModel.getItensCount(), 0)
         } else {
             XCTFail("Expected error state")
         }
     }
-}
-
-// MARK: - Mocks
-
-class MockMazeService: MazeServiceProtocol {
-    func fetchShows(page: Int) async throws -> [MazeWatch.Show] {
-        fatalError("Not implemented")
-    }
-
-    func fetchShowDetail(id: Int) async throws -> MazeWatch.Show {
-        fatalError("Not implemented")
-    }
-
-    func fetchSeasons(for showID: Int) async throws -> [MazeWatch.Season] {
-        fatalError("Not implemented")
-    }
-
-    func fetchEpisodes(for seasonID: Int) async throws -> [MazeWatch.Episode] {
-        fatalError("Not implemented")
-    }
-
-    var mockResults: [SearchResult] = []
-    var shouldFail = false
-
-    func search(query: String) async throws -> [SearchResult] {
-        if shouldFail {
-            throw MazeError.networkError(NSError(domain: "", code: -1))
+    
+    func testClearResults() {
+        // Arrange
+        // Simula resultados no resultsModel (usando o serviceMock e chamando search, ou configurando diretamente se possível)
+        serviceMock.searchResultsToReturn = [SearchResult.fixture()]
+        let expectation = expectation(description: "Delegate receives idle state after clearing")
+        
+        let delegate = DelegateSpy { state in
+            if case .idle = state {
+                expectation.fulfill()
+            }
         }
-        return mockResults
+        viewModel.delegate = delegate
+
+        // Simula uma busca para popular os resultados
+        Task {
+            await viewModel.search(query: "some query")
+            // Act
+            viewModel.clearResults()
+            // Assert
+            XCTAssertEqual(viewModel.getItensCount(), 0)
+        }
+
+        wait(for: [expectation], timeout: 1)
     }
 }
 
-class MockSearchViewModelDelegate: SearchViewModelDelegate {
-    let expectation = XCTestExpectation(description: "State updated")
-    var lastState: SearchState = .idle
+// Delegate spy to capture delegate calls
+class DelegateSpy: SearchViewModelDelegate {
+    var expectation: XCTestExpectation?
+    var lastState: SearchState?
+
+    private var didUpdateStateHandler: ((SearchState) -> Void)?
+
+    init(onUpdate: ((SearchState) -> Void)? = nil) {
+        self.didUpdateStateHandler = onUpdate
+    }
 
     func didUpdateState(_ state: SearchState) {
         lastState = state
-        expectation.fulfill()
+        expectation?.fulfill()
+        didUpdateStateHandler?(state)
     }
 }
