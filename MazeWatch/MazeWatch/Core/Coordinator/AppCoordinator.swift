@@ -17,7 +17,7 @@ final class AppCoordinator {
     init(window: UIWindow) {
         self.window = window
         self.homeListCoordinator = HomeListCoordinator()
-        self.searchShowsCoordinator = SearchShowsCoordinator()
+        self.searchShowsCoordinator = SearchCoordinator()
     }
 
     func start() {

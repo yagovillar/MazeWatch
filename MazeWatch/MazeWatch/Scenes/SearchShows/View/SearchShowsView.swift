@@ -6,7 +6,7 @@
 //
 import UIKit
 
-final class SearchShowsView: UIView {
+final class SearchView: UIView {
 
     // MARK: - UI Components
 
@@ -16,7 +16,7 @@ final class SearchShowsView: UIView {
         return searchBar
     }()
 
-    let showTalbeView: UITableView = {
+    let showTableView: UITableView = {
         let tableView = UITableView()
         tableView.backgroundColor = .background
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -38,10 +38,10 @@ final class SearchShowsView: UIView {
 
 // MARK: - ViewCode Conformance
 
-extension SearchShowsView: ViewCode {
+extension SearchView: ViewCode {
     func buildViewHierarchy() {
         addSubview(searchBar)
-        addSubview(showTalbeView)
+        addSubview(showTableView)
     }
 
     func setupConstraints() {
@@ -50,10 +50,10 @@ extension SearchShowsView: ViewCode {
             searchBar.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
             searchBar.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
 
-            showTalbeView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 28),
-            showTalbeView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            showTalbeView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
-            showTalbeView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
+            showTableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 28),
+            showTableView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
+            showTableView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            showTableView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
         ])
     }
 
@@ -63,5 +63,5 @@ extension SearchShowsView: ViewCode {
 }
 
 #Preview {
-    SearchShowsView()
+    SearchView()
 }

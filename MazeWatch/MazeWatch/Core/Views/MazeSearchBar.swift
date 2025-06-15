@@ -56,9 +56,5 @@ class CustomSearchBar: UIView, ViewCode {
             attributes: [.foregroundColor: UIColor.white.withAlphaComponent(0.7)]
         )
 
-        if let button = textField.rightView as? UIButton {
-            button.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
-            button.tintColor = .white
-        }
     }
 }

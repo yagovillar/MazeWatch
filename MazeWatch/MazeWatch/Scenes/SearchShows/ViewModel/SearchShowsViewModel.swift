@@ -7,66 +7,69 @@
 
 import Foundation
 
-protocol SearchShowsCoordinatorDelegate: AnyObject {
+protocol SearchCoordinatorDelegate: AnyObject {
     func didSelectShow(showId: Int)
 }
 
-protocol SearchShowsViewModelProtocol: AnyObject {
-    var delegate: SearchShowsViewModelDelegate? { get set }
+protocol SearchViewModelProtocol: AnyObject {
+    var delegate: SearchViewModelDelegate? { get set }
     func search(query: String)
     func clearResults()
-    func getShowsCount() -> Int
-    func getShow(at index: Int) -> Show
-    func didSelectShow(at index: Int)
+    func getItensCount() -> Int
+    func getItem(at index: Int) -> SearchResult
+    func didSelect(at index: Int)
 }
 
-protocol SearchShowsViewModelDelegate: AnyObject {
+protocol SearchViewModelDelegate: AnyObject {
     func didSearch()
 }
 
-class SearchShowsViewModel: SearchShowsViewModelProtocol {
+class SearchShowsViewModel: SearchViewModelProtocol {
 
-    weak var coordinatorDelegate: SearchShowsCoordinatorDelegate?
-    weak var delegate: SearchShowsViewModelDelegate?
+    weak var coordinatorDelegate: SearchCoordinatorDelegate?
+    weak var delegate: SearchViewModelDelegate?
     var service: MazeServiceProtocol
-    let resultsModel: ShowResultsManaging
+    let resultsModel: SearchModel
 
-
-    init(coordinatorDelegate: SearchShowsCoordinatorDelegate? = nil, service: MazeServiceProtocol, resultsModel: ShowResultsManaging = SearchShowsModel()) {
-        self.coordinatorDelegate = coordinatorDelegate
+    init(service: MazeServiceProtocol,
+         resultsModel: SearchModel = SearchModel()) {
         self.service = service
         self.resultsModel = resultsModel
     }
-    
+
     func search(query: String) {
-        service.searchShows(query: query) { [weak self] result in
-            switch result {
-            case .success(let results):
-                let shows = results.map { $0.show }
-                self?.resultsModel.update(with: shows)
-                self?.delegate?.didSearch()
-            case .failure(let error):
-                print("Search failed: \(error.localizedDescription)")
-                self?.clearResults()
+        Task {
+            do {
+                let results: [SearchResult] = try await self.service.search(query: query)
+                self.resultsModel.updateDataBase(data: results)
+                self.delegate?.didSearch()
+            } catch {
+                self.clearResults()
+                GlobalErrorHandler.shared.showError(error.localizedDescription)
             }
         }
     }
     
     func clearResults() {
-        resultsModel.clear()
-        self.delegate?.didSearch()
+        resultsModel.clearDataBase()
+        delegate?.didSearch()
     }
-    
-    func getShowsCount() -> Int {
-        return self.resultsModel.count
+
+    func getItensCount() -> Int {
+        return resultsModel.dataBaseCount
     }
-    
-    func getShow(at index: Int) -> Show {
-        guard let show = self.resultsModel.show(at: index) else { return Show.getEmptyShow() }
-        return show
+
+    func getItem(at index: Int) -> SearchResult {
+        return resultsModel.getItem(at: index)
     }
-    
-    func didSelectShow(at index: Int) {
-        coordinatorDelegate?.didSelectShow(showId: self.resultsModel.show(at: index)?.id ?? 0)
+
+    func didSelect(at index: Int) {
+        let item = resultsModel.getItem(at: index)
+        switch item.type {
+        case .person:
+            break // nav to details
+        case .show:
+            break// nav to details
+        }
     }
 }

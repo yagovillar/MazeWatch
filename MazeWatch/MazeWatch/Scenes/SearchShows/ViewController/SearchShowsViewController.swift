@@ -6,28 +6,28 @@
 //
 import UIKit
 
-class SearchShowsViewController: UIViewController {
-    var viewModel: SearchShowsViewModelProtocol?
-    private let searchShowsView = SearchShowsView()
+final class SearchViewController: UIViewController, SearchViewModelDelegate {
+    var viewModel: SearchViewModelProtocol?
+    private let searchView = SearchView()
     private var debounceTimer: Timer?
 
     override func loadView() {
-        self.view = searchShowsView
-        setupSearchListener()
+        self.view = searchView
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        searchShowsView.showTalbeView.dataSource = self
-        searchShowsView.showTalbeView.register(ShowListCell.self, forCellReuseIdentifier: "ShowCell")
+        setupSearchListener()
+        searchView.showTableView.dataSource = self
+        searchView.showTableView.register(ShowListCell.self, forCellReuseIdentifier: "ShowCell")
         viewModel?.delegate = self
-        // Set an image as the navigation bar title
+
         let imageView = UIImageView(image: UIImage(named: "iconVector"))
         imageView.contentMode = .scaleAspectFit
         navigationItem.titleView = imageView
     }
 
-    init(viewModel: SearchShowsViewModelProtocol? = nil) {
+    init(viewModel: SearchViewModelProtocol? = nil) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -35,9 +35,11 @@ class SearchShowsViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     private func setupSearchListener() {
-        searchShowsView.searchBar.textField.addTarget(self, action: #selector(searchTextChanged(_:)), for: .editingChanged)
+        searchView.searchBar.textField.addTarget(self,
+                                                 action: #selector(searchTextChanged(_:)),
+                                                 for: .editingChanged)
     }
 
     @objc private func searchTextChanged(_ sender: UITextField) {
@@ -53,31 +55,36 @@ class SearchShowsViewController: UIViewController {
         }
     }
 
-}
+    // MARK: - SearchViewModelDelegate
 
-extension SearchShowsViewController: SearchShowsViewModelDelegate {
     func didSearch() {
-        self.searchShowsView.showTalbeView.reloadData()
+        DispatchQueue.main.async {
+            self.searchView.showTableView.reloadData()
+        }
     }
 }
 
-extension SearchShowsViewController: UITableViewDataSource{
+// MARK: - UITableViewDataSource
+
+extension SearchViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel?.getShowsCount() ?? 0
+        return viewModel?.getItensCount() ?? 0
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ShowCell", for: indexPath) as? ShowListCell
-        let show = viewModel?.getShow(at: indexPath.row)
-        cell?.configure(imageURL: show?.image?.medium ?? "", title: show?.name ?? "", isFavorite: false)
-        return cell ?? UITableViewCell()
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "ShowCell", for: indexPath) as? ShowListCell,
+              let item = viewModel?.getItem(at: indexPath.row) else {
+            return UITableViewCell()
+        }
+        cell.configure(imageURL: item.item.image?.medium ?? "", title: item.item.name, isFavorite: false)
+        return cell
     }
-    
+
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 140
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.viewModel?.didSelectShow(at: indexPath.row)
+        viewModel?.didSelect(at: indexPath.row)
     }
 }
