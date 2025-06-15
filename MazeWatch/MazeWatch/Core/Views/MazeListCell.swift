@@ -1,12 +1,12 @@
 //
-//  ShowListCell.swift
+//  MazeListCell.swift
 //  MazeWatch
 //
 //  Created by Yago Vanzan on 14/06/25.
 //
 import UIKit
 
-class ShowListCell: UITableViewCell, ViewCode {
+class MazeListCell: UITableViewCell, ViewCode {
 
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -96,9 +96,13 @@ class ShowListCell: UITableViewCell, ViewCode {
         }, for: .touchUpInside)
     }
 
-    func configure(imageURL: String, title: String, isFavorite: Bool) {
+    func configure(imageURL: String, title: String, isFavorite: Bool?) {
         self.titleLabel.text = title
-        self.favoriteButton.isSelected = isFavorite
+        if let isFavorite = isFavorite {
+            self.favoriteButton.isSelected = isFavorite
+        } else {
+            self.favoriteButton.isHidden = true
+        }
         ImageLoader.shared.load(from: imageURL) { [weak self] image in
             self?.cellImageView.image = image
         }
@@ -107,7 +111,7 @@ class ShowListCell: UITableViewCell, ViewCode {
 
 @available(iOS 17.0, *)
 #Preview {
-    let cell = ShowListCell()
+    let cell = MazeListCell()
     cell.configure(imageURL: "", title: "The Witcher", isFavorite: true)
     return cell
 }

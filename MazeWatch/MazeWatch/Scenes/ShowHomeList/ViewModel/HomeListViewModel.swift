@@ -30,21 +30,20 @@ class HomeListViewModel: HomeListViewModelProtocol {
     var showList = ShowListModel()
     weak var delegate: HomeListViewModelDelegate?
 
-    init(homeListCoordinatorDelegate: HomeListCoordinatorDelegate? = nil, homeListService: MazeServiceProtocol?) {
-        self.coordinatorDelegate = homeListCoordinatorDelegate
+    init(homeListService: MazeServiceProtocol?) {
         self.service = homeListService
     }
 
     func fetchShows() {
-        service?.fetchShows(page: showList.currentPage ) { result in
-                switch result {
-                case .success(let shows):
-                    self.showList.currentPage += 1
-                    self.showList.shows.append(contentsOf: shows)
-                    self.delegate?.didLoadShows()
-                case .failure(let error):
-                    print("Error: \(error)")
-                }
+        Task {
+            do {
+                let shows = try await service?.fetchShows(page: showList.currentPage)
+                showList.currentPage += 1
+                showList.shows.append(contentsOf: shows ?? [])
+                delegate?.didLoadShows()
+            } catch {
+                GlobalErrorHandler.shared.showError(error.localizedDescription)
+            }
         }
     }
 

@@ -7,7 +7,7 @@
 import Foundation
 
 protocol NetworkClient {
-    func request<T: Decodable>(_ endpoint: Endpoint, completion: @escaping (Result<T, Error>) -> Void)
+    func request<T: Decodable>(_ endpoint: Endpoint) async throws -> T
 }
 
 class MazeNetworkClient: NetworkClient {
@@ -16,66 +16,80 @@ class MazeNetworkClient: NetworkClient {
     init(session: URLSession = .shared) {
         self.session = session
     }
-// swiftlint:disable function_body_length
-    func request<T: Decodable>(_ endpoint: Endpoint, completion: @escaping (Result<T, Error>) -> Void) {
-        guard let request = endpoint.urlRequest else {
-            completion(.failure(APIError.invalidURL))
-            return
+
+    func request<T: Decodable>(_ endpoint: Endpoint) async throws -> T {
+        try await withCheckedThrowingContinuation { continuation in
+            guard let request = endpoint.urlRequest else {
+                continuation.resume(throwing: MazeError.invalidResponse)
+                return
+            }
+
+            session.dataTask(with: request) { data, response, error in
+                NetworkLogger.log(.info, message: "API called",
+                                  urlRequest: request,
+                                  response: response,
+                                  data: data,
+                                  error: error)
+
+                if let error = error {
+                    DispatchQueue.main.async {
+                        GlobalErrorHandler.shared.showError(error.localizedDescription)
+                        continuation.resume(throwing: error)
+                    }
+                    return
+                }
+
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    DispatchQueue.main.async {
+                        GlobalErrorHandler.shared.showError("No response from server")
+                        continuation.resume(throwing: MazeError.noResults)
+                    }
+                    return
+                }
+
+                guard (200...299).contains(httpResponse.statusCode) else {
+                    var errorMessage = "Server error: \(httpResponse.statusCode)"
+                    if let data = data,
+                       let apiError = try? JSONDecoder().decode(MazeErrorResponse.self, from: data) {
+                        errorMessage = apiError.message
+                        if let previousError = apiError.previous {
+                            errorMessage += " - Previous error: \(previousError.message)"
+                        }
+                    }
+                    DispatchQueue.main.async {
+                        GlobalErrorHandler.shared.showError(errorMessage)
+                        continuation.resume(throwing: MazeError.serverError(httpResponse.statusCode, errorMessage))
+                    }
+                    return
+                }
+
+                guard let data = data else {
+                    DispatchQueue.main.async {
+                        GlobalErrorHandler.shared.showError("No data received")
+                        continuation.resume(throwing: MazeError.noResults)
+                    }
+                    return
+                }
+
+                do {
+                    if let jsonString = String(data: data, encoding: .utf8) {
+                        print("Response JSON: \(jsonString)")
+                    }
+                    let decoder = JSONDecoder()
+                    decoder.keyDecodingStrategy = .convertFromSnakeCase
+                    let decoded = try decoder.decode(T.self, from: data)
+                    DispatchQueue.main.async {
+                        continuation.resume(returning: decoded)
+                    }
+                } catch {
+                    print("Decoding error: \(error.localizedDescription)")
+                    DispatchQueue.main.async {
+                        GlobalErrorHandler.shared.showError("Failed to decode response: \(error.localizedDescription)")
+                        continuation.resume(throwing: MazeError.decodingError(error))
+                    }
+                }
+            }.resume()
         }
-        session.dataTask(with: request) { data, response, error in
-            NetworkLogger.log(.info, message: "Fetch Shows API called",
-                              urlRequest: request,
-                              response: response,
-                              data: data,
-                              error: error)
-            if let error = error {
-                DispatchQueue.main.async {
-                    completion(.failure(error))
-                    GlobalErrorHandler.shared.showError(error.localizedDescription)
-                }
-                return
-            }
-            guard let httpResponse = response as? HTTPURLResponse else {
-                DispatchQueue.main.async {
-                    completion(.failure(APIError.noData))
-                }
-                return
-            }
-            if !(200...299).contains(httpResponse.statusCode) {
-                var errorMessage = "A server error occurred."
-                if let data = data,
-                   let apiError = try? JSONDecoder().decode(MazeErrorResponse.self, from: data) {
-                    errorMessage = apiError.message
-                }
-                DispatchQueue.main.async {
-                    completion(.failure(APIError.serverError(
-                        statusCode: httpResponse.statusCode,
-                        message: errorMessage)
-                    ))
-                    GlobalErrorHandler.shared.showError(errorMessage)
-                }
-                return
-            }
-
-            guard let data = data else {
-                DispatchQueue.main.async {
-                    completion(.failure(APIError.noData))
-                    GlobalErrorHandler.shared.showError("No data received from server.")
-                }
-                return
-            }
-
-            do {
-                let decoded = try JSONDecoder().decode(T.self, from: data)
-                DispatchQueue.main.async {
-                    completion(.success(decoded))
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    completion(.failure(APIError.decodingError))
-                    GlobalErrorHandler.shared.showError("Failed to decode response.")
-                }
-            }
-        }.resume()
     }
+
 }

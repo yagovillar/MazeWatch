@@ -20,9 +20,8 @@ class HomeListViewController: UIViewController {
         super.viewDidLoad()
         homeListView.showTalbeView.delegate = self
         homeListView.showTalbeView.dataSource = self
-        homeListView.showTalbeView.register(ShowListCell.self, forCellReuseIdentifier: "ShowCell")
+        homeListView.showTalbeView.register(MazeListCell.self, forCellReuseIdentifier: "ShowCell")
         viewModel.delegate = self
-        GlobalErrorHandler.shared.showError("Teste de erro")
         // Set an image as the navigation bar title
         let imageView = UIImageView(image: UIImage(named: "iconVector"))
         imageView.contentMode = .scaleAspectFit
@@ -53,9 +52,9 @@ extension HomeListViewController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ShowCell", for: indexPath) as? ShowListCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ShowCell", for: indexPath) as? MazeListCell
         let show = viewModel.getShow(at: indexPath.row)
-        cell?.configure(imageURL: show.image?.medium ?? "", title: show.name ?? "", isFavorite: false)
+        cell?.configure(imageURL: show.image?.medium ?? "", title: show.name, isFavorite: false)
         return cell ?? UITableViewCell()
     }
 
@@ -65,7 +64,7 @@ extension HomeListViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let show = viewModel.getShow(at: indexPath.row)
-        viewModel.selectShow(showId: show.id ?? 0)
+        viewModel.selectShow(showId: show.id)
     }
 
 }
