@@ -35,6 +35,7 @@ class ShowListCell: UITableViewCell, ViewCode {
         imageView.layer.cornerRadius = 10
         imageView.clipsToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.image = UIImage(named: "Image")
         return imageView
     }()
 
@@ -94,16 +95,18 @@ class ShowListCell: UITableViewCell, ViewCode {
         }, for: .touchUpInside)
     }
 
-    func configure(image: UIImage, title: String, isFavorite: Bool) {
+    func configure(imageURL: String, title: String, isFavorite: Bool) {
         self.titleLabel.text = title
-        self.cellImageView.image = image
         self.favoriteButton.isSelected = isFavorite
+        ImageLoader.shared.load(from: imageURL) { [weak self] image in
+            self?.cellImageView.image = image
+        }
     }
 }
 
 @available(iOS 17.0, *)
 #Preview {
     let cell = ShowListCell()
-    cell.configure(image: UIImage(named: "Image") ?? UIImage(), title: "The Witcher", isFavorite: true)
+    cell.configure(imageURL: "", title: "The Witcher", isFavorite: true)
     return cell
 }

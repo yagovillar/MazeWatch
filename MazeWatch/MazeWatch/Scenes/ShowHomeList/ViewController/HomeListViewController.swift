@@ -22,7 +22,10 @@ class HomeListViewController: UIViewController {
         homeListView.showTalbeView.dataSource = self
         homeListView.showTalbeView.register(ShowListCell.self, forCellReuseIdentifier: "ShowCell")
         viewModel.delegate = self
-        title = "Home"
+        
+        let imageView = UIImageView(image: UIImage(named: "iconVector")) // substitua "Logo" pelo nome da imagem que você quer
+        imageView.contentMode = .scaleAspectFit
+        navigationItem.titleView = imageView
     }
 
     init(viewModel: HomeListViewModelProtocol) {
@@ -53,7 +56,7 @@ extension HomeListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ShowCell", for: indexPath) as? ShowListCell
         let show = viewModel.getShow(at: indexPath.row)
-        cell?.configure(image: UIImage(named: "Image") ?? UIImage(), title: show.name ?? "", isFavorite: true)
+        cell?.configure(imageURL: show.image?.medium ?? "", title: show.name ?? "", isFavorite: true)
         return cell ?? UITableViewCell()
     }
 
