@@ -21,15 +21,27 @@ protocol SearchViewModelProtocol: AnyObject {
 }
 
 protocol SearchViewModelDelegate: AnyObject {
-    func didSearch()
+    func didUpdateState(_ state: SearchState)
+}
+
+enum SearchState {
+    case idle
+    case loading
+    case results([SearchResult])
+    case error(MazeError)
 }
 
 class SearchShowsViewModel: SearchViewModelProtocol {
 
     weak var coordinatorDelegate: SearchCoordinatorDelegate?
     weak var delegate: SearchViewModelDelegate?
-    var service: MazeServiceProtocol
-    let resultsModel: SearchModel
+    private let service: MazeServiceProtocol
+    private let resultsModel: SearchModel
+    private var currentState: SearchState = .idle {
+        didSet {
+            delegate?.didUpdateState(currentState)
+        }
+    }
 
     init(service: MazeServiceProtocol,
          resultsModel: SearchModel = SearchModel()) {
@@ -38,21 +50,33 @@ class SearchShowsViewModel: SearchViewModelProtocol {
     }
 
     func search(query: String) {
+        guard !query.trimmingCharacters(in: .whitespaces).isEmpty else {
+            clearResults()
+            return
+        }
+        
+        currentState = .loading
+        
         Task {
             do {
-                let results: [SearchResult] = try await self.service.search(query: query)
-                self.resultsModel.updateDataBase(data: results)
-                self.delegate?.didSearch()
+                let results = try await service.search(query: query)
+                if results.isEmpty {
+                    GlobalErrorHandler.shared.showError("No results found")
+                    currentState = .error(.noResults)
+                } else {
+                    resultsModel.updateDataBase(with: results)
+                    currentState = .results(results)
+                }
             } catch {
-                self.clearResults()
                 GlobalErrorHandler.shared.showError(error.localizedDescription)
+                currentState = .error(.searchFailed(error))
             }
         }
     }
     
     func clearResults() {
         resultsModel.clearDataBase()
-        delegate?.didSearch()
+        currentState = .idle
     }
 
     func getItensCount() -> Int {

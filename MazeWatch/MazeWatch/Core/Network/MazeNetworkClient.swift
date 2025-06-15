@@ -52,10 +52,13 @@ class MazeNetworkClient: NetworkClient {
                     if let data = data,
                        let apiError = try? JSONDecoder().decode(MazeErrorResponse.self, from: data) {
                         errorMessage = apiError.message
+                        if let previousError = apiError.previous {
+                            errorMessage += " - Previous error: \(previousError.message)"
+                        }
                     }
                     DispatchQueue.main.async {
                         GlobalErrorHandler.shared.showError(errorMessage)
-                        continuation.resume(throwing: APIError.serverError(statusCode: httpResponse.statusCode, message: errorMessage))
+                        continuation.resume(throwing: MazeError.serverError(httpResponse.statusCode, errorMessage))
                     }
                     return
                 }

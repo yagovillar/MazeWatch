@@ -7,39 +7,25 @@
 
 import Foundation
 
+enum MazeError: Error {
+    case networkError(Error)
+    case invalidResponse
+    case decodingError(Error)
+    case searchFailed(Error)
+    case noResults
+    case serverError(Int, String)
+}
+
 struct MazeErrorResponse: Decodable {
     let name: String
     let message: String
     let code: Int
     let status: Int?
     let previous: PreviousError?
-
+    
     struct PreviousError: Decodable {
         let name: String
         let message: String
         let code: Int
-    }
-}
-
-enum APIError: LocalizedError {
-    case invalidURL
-    case invalidResponse
-    case serverError(statusCode: Int, message: String)
-    case noData
-    case decodingError
-
-    var errorDescription: String? {
-        switch self {
-        case .invalidURL:
-            return "Invalid URL."
-        case .invalidResponse:
-            return "Invalid response from server."
-        case .serverError(_, let message):
-            return message
-        case .noData:
-            return "No data received."
-        case .decodingError:
-            return "Failed to decode data."
-        }
     }
 }
