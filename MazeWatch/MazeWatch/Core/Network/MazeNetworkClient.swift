@@ -24,8 +24,11 @@ class MazeNetworkClient: NetworkClient {
         }
 
         session.dataTask(with: request) { data, response, error in
+            NetworkLogger.log(.info, message: "Fetch Shows API called", urlRequest: request, response: response, data: data, error: error)
+
             if let error = error {
                 completion(.failure(error))
+                GlobalErrorHandler.shared.showError(error.localizedDescription)
                 return
             }
 
