@@ -10,7 +10,12 @@ protocol HomeListCoordinatorDelegate: AnyObject {
     func didSelectShow(showId: Int)
 }
 
+protocol HomeListViewModelDelegate: AnyObject {
+    func didLoadShows()
+}
+
 protocol HomeListViewModelProtocol: AnyObject {
+    var delegate: HomeListViewModelDelegate? { get set }
     func fetchShows()
     func selectShow(showId: Int)
     func getShow(at index: Int) -> Show
@@ -19,12 +24,13 @@ protocol HomeListViewModelProtocol: AnyObject {
 
 class HomeListViewModel: HomeListViewModelProtocol {
 
-    weak var HomeListCoordinatorDelegate: HomeListCoordinatorDelegate?
+    weak var coordinatorDelegate: HomeListCoordinatorDelegate?
     var HomeListService: MazeServiceProtocol?
     var ShowList = ShowListModel()
+    weak var delegate: HomeListViewModelDelegate?
     
     init(HomeListCoordinatorDelegate: HomeListCoordinatorDelegate? = nil, HomeListService: MazeServiceProtocol?) {
-        self.HomeListCoordinatorDelegate = HomeListCoordinatorDelegate
+        self.coordinatorDelegate = HomeListCoordinatorDelegate
         self.HomeListService = HomeListService
     }
     
@@ -34,6 +40,7 @@ class HomeListViewModel: HomeListViewModelProtocol {
                     case .success(let shows):
                     self.ShowList.currentPage += 1
                     self.ShowList.shows.append(contentsOf: shows)
+                    self.delegate?.didLoadShows()
                 case .failure(let error):
                     print("Error: \(error)")
                 }
@@ -41,7 +48,7 @@ class HomeListViewModel: HomeListViewModelProtocol {
     }
     
     func selectShow(showId: Int) {
-        HomeListCoordinatorDelegate?.didSelectShow(showId: showId)
+        coordinatorDelegate?.didSelectShow(showId: showId)
     }
     
     func getShow(at index: Int) -> Show {

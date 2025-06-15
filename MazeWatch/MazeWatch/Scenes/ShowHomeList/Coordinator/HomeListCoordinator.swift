@@ -14,7 +14,7 @@ class HomeListCoordinator: Coordinator {
     func start() {
         let service = MazeService()
         let viewModel = HomeListViewModel(HomeListService: service)
-        viewModel.HomeListCoordinatorDelegate = self
+        viewModel.coordinatorDelegate = self
         let viewController = HomeListViewController(ViewModel: viewModel)
         viewController.title = "Shows"
         navigationController.tabBarItem = UITabBarItem(title: "Shows", image: UIImage(systemName: "tv"), tag: 0)

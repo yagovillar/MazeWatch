@@ -21,14 +21,8 @@ class HomeListViewController: UIViewController {
         homeListView.showTalbeView.delegate = self
         homeListView.showTalbeView.dataSource = self
         homeListView.showTalbeView.register(ShowListCell.self, forCellReuseIdentifier: "ShowCell")
-
-        self.ViewModel.fetchShows()
+        ViewModel.delegate = self
         title = "Home"
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        self.homeListView.showTalbeView.reloadData()
     }
     
     init(ViewModel: HomeListViewModelProtocol) {
@@ -84,6 +78,15 @@ extension HomeListViewController: UITableViewDelegate {
         
         if offsetY > contentHeight - frameHeight - 100 {
             loadMoreShows()
+        }
+    }
+}
+
+extension HomeListViewController: HomeListViewModelDelegate {
+    func didLoadShows() {
+        DispatchQueue.main.async {
+            self.isLoading = false
+            self.homeListView.showTalbeView.reloadData()
         }
     }
 }
