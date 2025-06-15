@@ -12,7 +12,8 @@ enum MazeAPI {
     case detail(id: Int)
     case seasons(showID: Int)
     case episodes(seasonID: Int)
-    case search(query: String) // Novo endpoint
+    case searchShows(query: String)
+    case searchPersons(query: String)
 }
 
 extension MazeAPI: Endpoint {
@@ -28,8 +29,10 @@ extension MazeAPI: Endpoint {
             return "/shows/\(showID)/seasons"
         case .episodes(let seasonID):
             return "/seasons/\(seasonID)/episodes"
-        case .search:
+        case .searchShows:
             return "/search/shows"
+        case .searchPersons:
+            return "/search/people"
         }
     }
 
@@ -39,7 +42,7 @@ extension MazeAPI: Endpoint {
         switch self {
         case .list(let page):
             return [URLQueryItem(name: "page", value: "\(page)")]
-        case .search(let query):
+        case .searchPersons(let query), .searchShows(let query):
             return [URLQueryItem(name: "q", value: query)]
         default:
             return nil

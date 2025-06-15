@@ -12,14 +12,14 @@ struct SearchShowItem: Codable {
     let show: Show
 }
 
-struct Show: Codable {
-    let id: Int?
-    let name: String?
+struct Show: Codable, SearchRepresentable {
+    let id: Int
+    let name: String
     let image: ShowImage?
     let summary: String?
 
     static func getEmptyShow() -> Show {
-        return Show(id: nil, name: nil, image: nil, summary: nil)
+        return Show(id: 0, name: "", image: nil, summary: nil)
     }
 }
 
@@ -74,6 +74,6 @@ struct Country: Codable {
 }
 
 struct ShowImage: Codable {
-    let medium: String
-    let original: String
+    let medium: String?
+    let original: String?
 }

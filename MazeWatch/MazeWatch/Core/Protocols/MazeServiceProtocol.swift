@@ -7,9 +7,9 @@
 import Foundation
 
 protocol MazeServiceProtocol {
-    func fetchShows(page: Int, completion: @escaping (Result<[Show], Error>) -> Void)
-    func fetchShowDetail(id: Int, completion: @escaping (Result<Show, Error>) -> Void)
-    func fetchSeasons(for showID: Int, completion: @escaping (Result<[Season], Error>) -> Void)
-    func fetchEpisodes(for seasonID: Int, completion: @escaping (Result<[Episode], Error>) -> Void)
-    func searchShows(query: String, completion: @escaping (Result<[SearchShowItem], Error>) -> Void)
+    func fetchShows(page: Int) async throws -> [Show]
+    func fetchShowDetail(id: Int) async throws -> Show
+    func fetchSeasons(for showID: Int) async throws -> [Season]
+    func fetchEpisodes(for seasonID: Int) async throws -> [Episode]
+    func search(query: String) async throws -> [SearchResult]
 }
