@@ -64,7 +64,7 @@ class SearchShowsViewModel: SearchViewModelProtocol {
                     GlobalErrorHandler.shared.showError("No results found")
                     currentState = .error(.noResults)
                 } else {
-                    resultsModel.updateDataBase(with: results)
+                    resultsModel.updateDataBase(data: results)
                     currentState = .results(results)
                 }
             } catch {

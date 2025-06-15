@@ -20,7 +20,7 @@ class MazeNetworkClient: NetworkClient {
     func request<T: Decodable>(_ endpoint: Endpoint) async throws -> T {
         try await withCheckedThrowingContinuation { continuation in
             guard let request = endpoint.urlRequest else {
-                continuation.resume(throwing: APIError.invalidURL)
+                continuation.resume(throwing: MazeError.invalidResponse)
                 return
             }
 
@@ -42,7 +42,7 @@ class MazeNetworkClient: NetworkClient {
                 guard let httpResponse = response as? HTTPURLResponse else {
                     DispatchQueue.main.async {
                         GlobalErrorHandler.shared.showError("No response from server")
-                        continuation.resume(throwing: APIError.noData)
+                        continuation.resume(throwing: MazeError.noResults)
                     }
                     return
                 }
@@ -66,7 +66,7 @@ class MazeNetworkClient: NetworkClient {
                 guard let data = data else {
                     DispatchQueue.main.async {
                         GlobalErrorHandler.shared.showError("No data received")
-                        continuation.resume(throwing: APIError.noData)
+                        continuation.resume(throwing: MazeError.noResults)
                     }
                     return
                 }
@@ -85,7 +85,7 @@ class MazeNetworkClient: NetworkClient {
                     print("Decoding error: \(error.localizedDescription)")
                     DispatchQueue.main.async {
                         GlobalErrorHandler.shared.showError("Failed to decode response: \(error.localizedDescription)")
-                        continuation.resume(throwing: APIError.decodingError)
+                        continuation.resume(throwing: MazeError.decodingError(error))
                     }
                 }
             }.resume()

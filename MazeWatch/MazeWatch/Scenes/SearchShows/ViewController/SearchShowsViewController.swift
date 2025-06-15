@@ -56,8 +56,7 @@ final class SearchViewController: UIViewController, SearchViewModelDelegate {
     }
     
     // MARK: - SearchViewModelDelegate
-
-    func didSearch() {
+    func didUpdateState(_ state: SearchState) {
         DispatchQueue.main.async {
             self.searchView.showTableView.reloadData()
         }
