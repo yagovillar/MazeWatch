@@ -7,13 +7,13 @@
 import Foundation
 
 final class MazeService: MazeServiceProtocol {
-    
+
     private let client: NetworkClient
 
     init(client: NetworkClient = MazeNetworkClient()) {
         self.client = client
     }
-    
+
     func fetchShows(page: Int) async throws -> [Show] {
         do {
             return try await client.request(MazeAPI.list(page: page))

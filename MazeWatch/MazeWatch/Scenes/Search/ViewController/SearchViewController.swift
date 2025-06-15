@@ -19,7 +19,7 @@ final class SearchViewController: UIViewController, SearchViewModelDelegate {
         super.viewDidLoad()
         setupSearchListener()
         searchView.showTableView.dataSource = self
-        searchView.showTableView.register(ShowListCell.self, forCellReuseIdentifier: "ShowCell")
+        searchView.showTableView.register(MazeListCell.self, forCellReuseIdentifier: "ShowCell")
         viewModel?.delegate = self
 
         let imageView = UIImageView(image: UIImage(named: "iconVector"))
@@ -35,26 +35,26 @@ final class SearchViewController: UIViewController, SearchViewModelDelegate {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     private func setupSearchListener() {
         searchView.searchBar.textField.addTarget(self,
                                                  action: #selector(searchTextChanged(_:)),
                                                  for: .editingChanged)
     }
-    
+
     @objc private func searchTextChanged(_ sender: UITextField) {
         debounceTimer?.invalidate()
-        
+
         guard let query = sender.text, !query.trimmingCharacters(in: .whitespaces).isEmpty else {
             viewModel?.clearResults()
             return
         }
-        
+
         debounceTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
             self?.viewModel?.search(query: query)
         }
     }
-    
+
     // MARK: - SearchViewModelDelegate
     func didUpdateState(_ state: SearchState) {
         DispatchQueue.main.async {
@@ -69,13 +69,13 @@ extension SearchViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return viewModel?.getItensCount() ?? 0
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "ShowCell", for: indexPath) as? ShowListCell,
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "ShowCell", for: indexPath) as? MazeListCell,
               let item = viewModel?.getItem(at: indexPath.row) else {
             return UITableViewCell()
         }
-        cell.configure(imageURL: item.item.image?.medium ?? "", title: item.item.name, isFavorite: false)
+        cell.configure(imageURL: item.item.image?.medium ?? "", title: item.item.name, isFavorite: nil)
         return cell
     }
 

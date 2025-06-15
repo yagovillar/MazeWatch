@@ -54,9 +54,9 @@ class SearchShowsViewModel: SearchViewModelProtocol {
             clearResults()
             return
         }
-        
+
         currentState = .loading
-        
+
         Task {
             do {
                 let results = try await service.search(query: query)
@@ -73,7 +73,7 @@ class SearchShowsViewModel: SearchViewModelProtocol {
             }
         }
     }
-    
+
     func clearResults() {
         resultsModel.clearDataBase()
         currentState = .idle
