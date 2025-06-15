@@ -13,7 +13,7 @@ struct MazeErrorResponse: Decodable {
     let code: Int
     let status: Int?
     let previous: PreviousError?
-    
+
     struct PreviousError: Decodable {
         let name: String
         let message: String

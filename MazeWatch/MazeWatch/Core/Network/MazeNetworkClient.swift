@@ -12,7 +12,7 @@ protocol NetworkClient {
 
 class MazeNetworkClient: NetworkClient {
     private let session: URLSession
-    
+
     init(session: URLSession = .shared) {
         self.session = session
     }
@@ -24,7 +24,10 @@ class MazeNetworkClient: NetworkClient {
         }
 
         session.dataTask(with: request) { data, response, error in
-            NetworkLogger.log(.info, message: "Fetch Shows API called", urlRequest: request, response: response, data: data, error: error)
+            NetworkLogger.log(.info, message: "Fetch Shows API called",
+                              urlRequest: request,
+                              response: response,
+                              data: data, error: error)
 
             if let error = error {
                 completion(.failure(error))

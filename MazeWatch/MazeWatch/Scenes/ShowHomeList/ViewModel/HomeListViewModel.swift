@@ -25,38 +25,38 @@ protocol HomeListViewModelProtocol: AnyObject {
 class HomeListViewModel: HomeListViewModelProtocol {
 
     weak var coordinatorDelegate: HomeListCoordinatorDelegate?
-    var HomeListService: MazeServiceProtocol?
-    var ShowList = ShowListModel()
+    var homeListService: MazeServiceProtocol?
+    var showList = ShowListModel()
     weak var delegate: HomeListViewModelDelegate?
-    
-    init(HomeListCoordinatorDelegate: HomeListCoordinatorDelegate? = nil, HomeListService: MazeServiceProtocol?) {
-        self.coordinatorDelegate = HomeListCoordinatorDelegate
-        self.HomeListService = HomeListService
+
+    init(homeListCoordinatorDelegate: HomeListCoordinatorDelegate? = nil, homeListService: MazeServiceProtocol?) {
+        self.coordinatorDelegate = homeListCoordinatorDelegate
+        self.homeListService = homeListService
     }
-    
+
     func fetchShows() {
-        HomeListService?.fetchShows(page: ShowList.currentPage ) { result in
+        homeListService?.fetchShows(page: showList.currentPage ) { result in
                 switch result {
-                    case .success(let shows):
-                    self.ShowList.currentPage += 1
-                    self.ShowList.shows.append(contentsOf: shows)
+                case .success(let shows):
+                    self.showList.currentPage += 1
+                    self.showList.shows.append(contentsOf: shows)
                     self.delegate?.didLoadShows()
                 case .failure(let error):
                     print("Error: \(error)")
                 }
         }
     }
-    
+
     func selectShow(showId: Int) {
         coordinatorDelegate?.didSelectShow(showId: showId)
     }
-    
+
     func getShow(at index: Int) -> Show {
-        return ShowList.shows[index]
+        return showList.shows[index]
     }
-    
+
     func getShowCount() -> Int {
-        return ShowList.shows.count
+        return showList.shows.count
     }
-    
+
 }

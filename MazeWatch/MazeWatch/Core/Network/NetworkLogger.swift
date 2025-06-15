@@ -16,7 +16,7 @@ final class NetworkLogger {
     static var isEnabled = true
 
     private static let separator = "──────────────────────────────────────────────"
-    
+
     private static func color(_ text: String, colorCode: String) -> String {
         return "\(colorCode)\(text)\u{001B}[0m"
     }
@@ -33,68 +33,81 @@ final class NetworkLogger {
                     response: URLResponse? = nil,
                     data: Data? = nil,
                     error: Error? = nil) {
-        
+
         guard isEnabled else { return }
-        
-        let prefix: String
-        let colorCode: String
-        
-        switch level {
-        case .info:
-            prefix = "ℹ️ [INFO]"
-            colorCode = cyan
-        case .warning:
-            prefix = "⚠️ [WARNING]"
-            colorCode = yellow
-        case .error:
-            prefix = "❌ [ERROR]"
-            colorCode = red
-        }
-        
+
+        let (prefix, colorCode) = prefixAndColor(for: level)
+
         print("\n\(color(separator, colorCode: magenta))")
         print(color("\(prefix) \(message)", colorCode: colorCode))
-        
+
         if let request = urlRequest {
-            print(color("➡️ Request:", colorCode: green))
-            print("   Method: \(request.httpMethod ?? "N/A")")
-            print("   URL: \(request.url?.absoluteString ?? "N/A")")
-            
-            if let headers = request.allHTTPHeaderFields {
-                print("   Headers:")
-                for (key, value) in headers {
-                    print("     • \(key): \(value)")
-                }
-            }
-            
-            if let body = request.httpBody,
-               let bodyString = String(data: body, encoding: .utf8) {
-                print("   Body:\n\(indent(text: bodyString, level: 2))")
-            }
+            logRequest(request)
         }
-        
+
         if let httpResponse = response as? HTTPURLResponse {
-            print(color("⬅️ Response:", colorCode: green))
-            print("   Status Code: \(httpResponse.statusCode)")
+            logResponse(httpResponse)
+        }
+
+        if let data = data {
+            logResponseBody(data)
+        }
+
+        if let error = error {
+            logError(error)
+        }
+
+        print(color(separator, colorCode: magenta) + "\n")
+    }
+
+    private static func prefixAndColor(for level: NetworkLogLevel) -> (String, String) {
+        switch level {
+        case .info:
+            return ("ℹ️ [INFO]", cyan)
+        case .warning:
+            return ("⚠️ [WARNING]", yellow)
+        case .error:
+            return ("❌ [ERROR]", red)
+        }
+    }
+
+    private static func logRequest(_ request: URLRequest) {
+        print(color("➡️ Request:", colorCode: green))
+        print("   Method: \(request.httpMethod ?? "N/A")")
+        print("   URL: \(request.url?.absoluteString ?? "N/A")")
+
+        if let headers = request.allHTTPHeaderFields {
             print("   Headers:")
-            for (key, value) in httpResponse.allHeaderFields {
+            for (key, value) in headers {
                 print("     • \(key): \(value)")
             }
         }
-        
-        if let data = data,
-           let responseBody = String(data: data, encoding: .utf8),
-           !responseBody.isEmpty {
-            print(color("📦 Response Body:", colorCode: green))
-            print(indent(text: responseBody, level: 1))
+
+        if let body = request.httpBody,
+           let bodyString = String(data: body, encoding: .utf8) {
+            print("   Body:\n\(indent(text: bodyString, level: 2))")
         }
-        
-        if let error = error {
-            print(color("⚠️ Error: \(error.localizedDescription)", colorCode: red))
-        }
-        
-        print(color(separator, colorCode: magenta) + "\n")
     }
-    
+
+    private static func logResponse(_ httpResponse: HTTPURLResponse) {
+        print(color("⬅️ Response:", colorCode: green))
+        print("   Status Code: \(httpResponse.statusCode)")
+        print("   Headers:")
+        for (key, value) in httpResponse.allHeaderFields {
+            print("     • \(key): \(value)")
+        }
+    }
+
+    private static func logResponseBody(_ data: Data) {
+        guard let responseBody = String(data: data, encoding: .utf8), !responseBody.isEmpty else { return }
+        print(color("📦 Response Body:", colorCode: green))
+        print(indent(text: responseBody, level: 1))
+    }
+
+    private static func logError(_ error: Error) {
+        print(color("⚠️ Error: \(error.localizedDescription)", colorCode: red))
+    }
+
     private static func indent(text: String, level: Int) -> String {
         let prefix = String(repeating: "    ", count: level)
         return text

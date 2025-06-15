@@ -18,14 +18,13 @@ final class GlobalErrorHandler {
                 .first?.windows
                 .first(where: { $0.isKeyWindow }) else { return }
 
-            
             if window.subviews.contains(where: { $0 is ToastView }) {
                 return
             }
-            
+
             let toast = ToastView(message: message)
             window.addSubview(toast)
-            
+
             toast.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
                 toast.leadingAnchor.constraint(equalTo: window.leadingAnchor, constant: 16),

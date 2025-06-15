@@ -12,4 +12,3 @@ protocol Endpoint {
     var method: String { get }
     var queryItems: [URLQueryItem]? { get }
 }
-

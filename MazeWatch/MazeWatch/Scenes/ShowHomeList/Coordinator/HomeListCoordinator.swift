@@ -8,14 +8,14 @@
 import UIKit
 
 class HomeListCoordinator: Coordinator {
-  
+
     var navigationController = UINavigationController()
 
     func start() {
         let service = MazeService()
-        let viewModel = HomeListViewModel(HomeListService: service)
+        let viewModel = HomeListViewModel(homeListService: service)
         viewModel.coordinatorDelegate = self
-        let viewController = HomeListViewController(ViewModel: viewModel)
+        let viewController = HomeListViewController(viewModel: viewModel)
         viewController.title = "Shows"
         navigationController.tabBarItem = UITabBarItem(title: "Shows", image: UIImage(systemName: "tv"), tag: 0)
         navigationController.navigationBar.titleTextAttributes = [

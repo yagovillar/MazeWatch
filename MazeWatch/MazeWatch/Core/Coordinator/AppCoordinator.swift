@@ -23,9 +23,9 @@ final class AppCoordinator {
         window.rootViewController = getTabBarController()
         window.makeKeyAndVisible()
     }
-    
+
     func getTabBarController() -> UITabBarController {
-        var tabBarController = UITabBarController()
+        let tabBarController = UITabBarController()
 
         tabBarController.tabBar.layer.cornerRadius = 20
         tabBarController.tabBar.layer.masksToBounds = true
@@ -44,9 +44,8 @@ final class AppCoordinator {
         tabBarController.tabBar.backgroundColor = .fill
 
         tabBarController.viewControllers = [
-            homeListCoordinator.navigationController,
+            homeListCoordinator.navigationController
         ]
-        
         return tabBarController
     }
 }

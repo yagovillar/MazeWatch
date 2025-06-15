@@ -32,7 +32,7 @@ class ToastView: UIView {
             messageLabel.topAnchor.constraint(equalTo: topAnchor, constant: 12),
             messageLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -12)
         ])
-        
+
         alpha = 0
     }
 
@@ -40,17 +40,16 @@ class ToastView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func showAndDismiss() {
-        // Fade in
+    func showAndDismiss(duration: TimeInterval = 3.0, fadeDuration: TimeInterval = 0.3) {
+        layer.removeAllAnimations()
+
+        self.alpha = 0
+        self.isHidden = false
+
         UIView.animate(withDuration: 0.3, animations: {
             self.alpha = 1
-        }) { _ in
-            // Depois some depois de 3 segundos
-            UIView.animate(withDuration: 0.3, delay: 3, options: [], animations: {
-                self.alpha = 0
-            }) { _ in
-                self.removeFromSuperview()
-            }
-        }
+        }, completion: { _ in
+            self.removeFromSuperview()
+        })
     }
 }

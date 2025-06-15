@@ -19,7 +19,7 @@ final class HomeListView: UIView {
         label.text = "Popular Shows"
         return label
     }()
-    
+
     let showTalbeView: UITableView = {
         let tableView = UITableView()
         tableView.backgroundColor = .background

@@ -4,6 +4,7 @@
 //
 //  Created by Yago Vanzan on 13/06/25.
 //
+// swiftlint:disable all
 
 import UIKit
 
