@@ -22,8 +22,8 @@ class HomeListViewController: UIViewController {
         homeListView.showTalbeView.dataSource = self
         homeListView.showTalbeView.register(ShowListCell.self, forCellReuseIdentifier: "ShowCell")
         viewModel.delegate = self
-        
-        let imageView = UIImageView(image: UIImage(named: "iconVector")) // substitua "Logo" pelo nome da imagem que você quer
+
+        let imageView = UIImageView(image: UIImage(named: "iconVector"))
         imageView.contentMode = .scaleAspectFit
         navigationItem.titleView = imageView
     }
