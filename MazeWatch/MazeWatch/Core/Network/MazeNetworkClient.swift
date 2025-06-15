@@ -23,7 +23,7 @@ class MazeNetworkClient: NetworkClient {
             return
         }
         session.dataTask(with: request) { data, response, error in
-            NetworkLogger.log(.info, message: "Fetch Shows API called",
+            NetworkLogger.log(.info, message: "API called",
                               urlRequest: request,
                               response: response,
                               data: data,

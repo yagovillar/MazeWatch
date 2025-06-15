@@ -22,7 +22,6 @@ class HomeListViewController: UIViewController {
         homeListView.showTalbeView.dataSource = self
         homeListView.showTalbeView.register(ShowListCell.self, forCellReuseIdentifier: "ShowCell")
         viewModel.delegate = self
-        GlobalErrorHandler.shared.showError("Teste de erro")
         // Set an image as the navigation bar title
         let imageView = UIImageView(image: UIImage(named: "iconVector"))
         imageView.contentMode = .scaleAspectFit

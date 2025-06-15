@@ -12,14 +12,17 @@ final class AppCoordinator {
     private let window: UIWindow
 
     private let homeListCoordinator: Coordinator
+    private let searchShowsCoordinator: Coordinator
 
     init(window: UIWindow) {
         self.window = window
         self.homeListCoordinator = HomeListCoordinator()
+        self.searchShowsCoordinator = SearchShowsCoordinator()
     }
 
     func start() {
         homeListCoordinator.start()
+        searchShowsCoordinator.start()
         window.rootViewController = getTabBarController()
         window.makeKeyAndVisible()
     }
@@ -44,7 +47,8 @@ final class AppCoordinator {
         tabBarController.tabBar.backgroundColor = .fill
 
         tabBarController.viewControllers = [
-            homeListCoordinator.navigationController
+            homeListCoordinator.navigationController,
+            searchShowsCoordinator.navigationController
         ]
         return tabBarController
     }

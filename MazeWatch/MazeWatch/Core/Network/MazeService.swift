@@ -28,4 +28,8 @@ class MazeService: MazeServiceProtocol {
     func fetchEpisodes(for seasonID: Int, completion: @escaping (Result<[Episode], Error>) -> Void) {
         client.request(MazeAPI.episodes(seasonID: seasonID), completion: completion)
     }
+
+    func searchShows(query: String, completion: @escaping (Result<[SearchShowItem], Error>) -> Void) {
+        client.request(MazeAPI.search(query: query), completion: completion)
+    }
 }

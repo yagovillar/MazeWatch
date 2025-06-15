@@ -11,4 +11,5 @@ protocol MazeServiceProtocol {
     func fetchShowDetail(id: Int, completion: @escaping (Result<Show, Error>) -> Void)
     func fetchSeasons(for showID: Int, completion: @escaping (Result<[Season], Error>) -> Void)
     func fetchEpisodes(for seasonID: Int, completion: @escaping (Result<[Episode], Error>) -> Void)
+    func searchShows(query: String, completion: @escaping (Result<[SearchShowItem], Error>) -> Void)
 }
