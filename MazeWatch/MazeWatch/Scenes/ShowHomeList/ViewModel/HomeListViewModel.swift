@@ -6,14 +6,15 @@
 //
 
 import Foundation
+// Called by ViewModel to inform Coordinator about navigation actions
 protocol HomeListCoordinatorDelegate: AnyObject {
     func didSelectShow(showId: Int)
 }
-
+// Called by ViewModel to inform ViewController about data changes
 protocol HomeListViewModelDelegate: AnyObject {
     func didLoadShows()
 }
-
+// Interface to be used by ViewController, enforcing SOLID principles
 protocol HomeListViewModelProtocol: AnyObject {
     var delegate: HomeListViewModelDelegate? { get set }
     func fetchShows()
@@ -25,17 +26,17 @@ protocol HomeListViewModelProtocol: AnyObject {
 class HomeListViewModel: HomeListViewModelProtocol {
 
     weak var coordinatorDelegate: HomeListCoordinatorDelegate?
-    var homeListService: MazeServiceProtocol?
+    var service: MazeServiceProtocol?
     var showList = ShowListModel()
     weak var delegate: HomeListViewModelDelegate?
 
     init(homeListCoordinatorDelegate: HomeListCoordinatorDelegate? = nil, homeListService: MazeServiceProtocol?) {
         self.coordinatorDelegate = homeListCoordinatorDelegate
-        self.homeListService = homeListService
+        self.service = homeListService
     }
 
     func fetchShows() {
-        homeListService?.fetchShows(page: showList.currentPage ) { result in
+        service?.fetchShows(page: showList.currentPage ) { result in
                 switch result {
                 case .success(let shows):
                     self.showList.currentPage += 1

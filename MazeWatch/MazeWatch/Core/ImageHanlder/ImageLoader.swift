@@ -12,39 +12,47 @@ final class ImageLoader {
     static let shared = ImageLoader()
 
     private let cache = NSCache<NSString, UIImage>()
-
-    /// Nome da imagem default no Assets (ex: "Image")
     private let defaultImageName = "Image"
 
     private init() {}
 
-    func load(from urlString: String, completion: @escaping (UIImage) -> Void) {
-        // Retorna imagem do cache se existir
+    // Keep reference to tasks to allow cancellation
+    private var runningTasks = [URL: URLSessionDataTask]()
+
+    @discardableResult
+    func load(from urlString: String, completion: @escaping (UIImage?) -> Void) -> URLSessionDataTask? {
         if let cachedImage = cache.object(forKey: urlString as NSString) {
             completion(cachedImage)
-            return
+            return nil
         }
 
-        // Cria URL válida
         guard let url = URL(string: urlString) else {
             completion(defaultImage())
-            return
+            return nil
         }
 
-        // Faz download da imagem
-        URLSession.shared.dataTask(with: url) { data, _, _ in
+        // Cancel previous task for this URL if any
+        runningTasks[url]?.cancel()
+
+        let task = URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
             DispatchQueue.main.async {
+                defer { self?.runningTasks[url] = nil }
+
                 if let data = data, let image = UIImage(data: data) {
-                    self.cache.setObject(image, forKey: urlString as NSString)
+                    self?.cache.setObject(image, forKey: urlString as NSString)
                     completion(image)
                 } else {
-                    completion(self.defaultImage())
+                    completion(self?.defaultImage())
                 }
             }
-        }.resume()
+        }
+        runningTasks[url] = task
+        task.resume()
+
+        return task
     }
 
-    private func defaultImage() -> UIImage {
-        return UIImage(named: defaultImageName) ?? UIImage()
+    private func defaultImage() -> UIImage? {
+        return UIImage(named: defaultImageName)
     }
 }

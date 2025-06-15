@@ -19,6 +19,7 @@ class ShowListCell: UITableViewCell, ViewCode {
 
     private let favoriteButton: UIButton = {
         let button = UIButton()
+        button.isSelected = false
         button.translatesAutoresizingMaskIntoConstraints = false
         button.configurationUpdateHandler = { button in
             var config = UIButton.Configuration.plain()

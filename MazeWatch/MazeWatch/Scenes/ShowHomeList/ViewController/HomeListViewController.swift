@@ -22,7 +22,8 @@ class HomeListViewController: UIViewController {
         homeListView.showTalbeView.dataSource = self
         homeListView.showTalbeView.register(ShowListCell.self, forCellReuseIdentifier: "ShowCell")
         viewModel.delegate = self
-
+        GlobalErrorHandler.shared.showError("Teste de erro")
+        // Set an image as the navigation bar title
         let imageView = UIImageView(image: UIImage(named: "iconVector"))
         imageView.contentMode = .scaleAspectFit
         navigationItem.titleView = imageView
@@ -36,14 +37,12 @@ class HomeListViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    // Loads more shows when triggered by infinite scroll
     private func loadMoreShows() {
         guard !isLoading else { return }
         isLoading = true
-
+        GlobalLoader.shared.show()
         self.viewModel.fetchShows()
-        self.homeListView.showTalbeView.reloadData()
-        self.isLoading = false
     }
 
 }
@@ -56,7 +55,7 @@ extension HomeListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ShowCell", for: indexPath) as? ShowListCell
         let show = viewModel.getShow(at: indexPath.row)
-        cell?.configure(imageURL: show.image?.medium ?? "", title: show.name ?? "", isFavorite: true)
+        cell?.configure(imageURL: show.image?.medium ?? "", title: show.name ?? "", isFavorite: false)
         return cell ?? UITableViewCell()
     }
 
@@ -72,7 +71,7 @@ extension HomeListViewController: UITableViewDataSource {
 }
 
 extension HomeListViewController: UITableViewDelegate {
-
+    // Trigger pagination when user scrolls near bottom
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
@@ -89,6 +88,7 @@ extension HomeListViewController: HomeListViewModelDelegate {
         DispatchQueue.main.async {
             self.isLoading = false
             self.homeListView.showTalbeView.reloadData()
+            GlobalLoader.shared.hide()
         }
     }
 }

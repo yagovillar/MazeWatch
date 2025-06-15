@@ -29,7 +29,7 @@ final class GlobalErrorHandler {
             NSLayoutConstraint.activate([
                 toast.leadingAnchor.constraint(equalTo: window.leadingAnchor, constant: 16),
                 toast.trailingAnchor.constraint(equalTo: window.trailingAnchor, constant: -16),
-                toast.topAnchor.constraint(equalTo: window.safeAreaLayoutGuide.topAnchor, constant: 16),
+                toast.bottomAnchor.constraint(equalTo: window.safeAreaLayoutGuide.bottomAnchor, constant: -64),
                 toast.heightAnchor.constraint(greaterThanOrEqualToConstant: 50)
             ])
 

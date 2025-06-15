@@ -50,12 +50,6 @@ class EpisodesListCell: UITableViewCell, ViewCode {
         setupView()
     }
 
-    init(title: String, season: Int, episode: Int, image: UIImage, reuseIdentifier: String?) {
-        super.init(style: .default, reuseIdentifier: reuseIdentifier)
-        setupView()
-        configure(title: title, season: season, episode: episode, image: image)
-    }
-
     func buildViewHierarchy() {
         contentView.addSubview(backGroundImageView)
         contentView.addSubview(titleLabel)
@@ -91,9 +85,11 @@ class EpisodesListCell: UITableViewCell, ViewCode {
 }
 
 extension EpisodesListCell {
-    func configure(title: String, season: Int, episode: Int, image: UIImage) {
+    func configure(title: String, season: Int, episode: Int, imageURL: String) {
         self.titleLabel.text = title
-        self.backGroundImageView.image = image
+        ImageLoader.shared.load(from: imageURL) { [weak self] image in
+            self?.backGroundImageView.image = image
+        }
         self.seasonAndEpisodeLabel.text = "Season \(season) - Episode \(episode)"
     }
 }
