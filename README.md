@@ -26,11 +26,6 @@ MazeWatch is an iOS application that allows users to browse and search TV series
 - [x] People search functionality
   - Search by name
   - Display name and image
-  - Detailed person view with:
-    - Name
-    - Image
-    - List of series they've participated in
-    - Links to series details
 
 ## Technical Implementation
 
