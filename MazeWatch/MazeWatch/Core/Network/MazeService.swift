@@ -23,7 +23,7 @@ final class MazeService: MazeServiceProtocol {
         }
     }
 
-    func fetchShowDetail(id: Int) async throws -> Show {
+    func fetchShowDetail(id: Int) async throws -> ShowDetails {
         do {
             return try await client.request(MazeAPI.detail(id: id))
         } catch {

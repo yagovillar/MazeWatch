@@ -49,7 +49,14 @@ struct ShowDetails: Codable {
     let network: Network?
     let image: ShowImage?
     let summary: String?
-    let seasons: [Season]?
+    var seasons: [Season]?
+    
+    static func getEmptyShowDetails() -> ShowDetails {
+        return ShowDetails(id: 0, url: "", name: "", type: "", language: nil, genres: [],
+                           status: nil, runtime: nil, averageRuntime: nil, premiered: nil,
+                           officialSite: nil, schedule: Schedule(time: "", days: []),
+                           rating: nil, weight: nil, network: nil, image: nil, summary: nil, seasons: nil)
+    }
 }
 
 struct Schedule: Codable {

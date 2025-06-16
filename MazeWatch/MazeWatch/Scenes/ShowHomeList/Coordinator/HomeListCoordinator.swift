@@ -28,6 +28,11 @@ class HomeListCoordinator: Coordinator {
 
 extension HomeListCoordinator: HomeListCoordinatorDelegate {
     func didSelectShow(showId: Int) {
-        // navigate to show page
+        let model = DetailsManager()
+        model.id = showId
+        let viewModel = ShowDetailsViewModel(service: MazeService(), model: model)
+        let viewController = ShowDetailsViewController(viewModel: viewModel)
+        viewModel.delegate = viewController
+        navigationController.pushViewController(viewController, animated: true)
     }
 }
