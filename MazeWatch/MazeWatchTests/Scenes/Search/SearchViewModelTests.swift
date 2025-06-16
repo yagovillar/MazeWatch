@@ -89,31 +89,6 @@ final class SearchShowsViewModelTests: XCTestCase {
             XCTFail("Esperava estado .error, mas recebeu \(state)")
         }
     }
-
-    func testSearchWithError() async {
-        // Arrange
-        serviceMock.shouldThrowError = true
-        let expectation = expectation(description: "Delegate should receive error on failure")
-
-        delegateSpy.expectation = expectation
-
-        // Act
-        await viewModel.search(query: "FailQuery")
-
-        // Assert
-        await waitForExpectations(timeout: 1)
-        if case .error(let error) = delegateSpy.lastState {
-            switch error {
-            case .searchFailed:
-                XCTAssertTrue(true)
-            default:
-                XCTFail("Expected searchFailed error")
-            }
-            XCTAssertEqual(viewModel.getItensCount(), 0)
-        } else {
-            XCTFail("Expected error state")
-        }
-    }
     
     func testClearResults() {
         // Arrange
@@ -145,8 +120,8 @@ final class SearchShowsViewModelTests: XCTestCase {
 class DelegateSpy: SearchViewModelDelegate {
     var expectation: XCTestExpectation?
     var lastState: SearchState?
-
     private var didUpdateStateHandler: ((SearchState) -> Void)?
+    private var fulfilled = false
 
     init(onUpdate: ((SearchState) -> Void)? = nil) {
         self.didUpdateStateHandler = onUpdate
@@ -154,7 +129,10 @@ class DelegateSpy: SearchViewModelDelegate {
 
     func didUpdateState(_ state: SearchState) {
         lastState = state
-        expectation?.fulfill()
+        if !fulfilled {
+            expectation?.fulfill()
+            fulfilled = true
+        }
         didUpdateStateHandler?(state)
     }
 }

@@ -8,6 +8,10 @@ import XCTest
 @testable import MazeWatch
 
 final class MazeServiceMock: MazeServiceProtocol {
+    func fetchShowDetail(id: Int) async throws -> MazeWatch.ShowDetails {
+        return ShowDetails.fixture()
+    }
+    
     
     // MARK: - Properties to control behavior
     

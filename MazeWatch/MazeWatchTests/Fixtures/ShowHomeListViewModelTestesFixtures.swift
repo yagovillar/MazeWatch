@@ -80,11 +80,11 @@ extension Season {
             episodeOrder: episodeOrder,
             premiereDate: premiereDate,
             endDate: endDate,
-            network: network,
+            network: nil,
             webChannel: webChannel,
             image: image,
             summary: summary,
-            links: links,
+            links: nil,
             episodes: episodes
         )
     }
