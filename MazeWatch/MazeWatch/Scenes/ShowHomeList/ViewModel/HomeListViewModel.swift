@@ -9,6 +9,7 @@ import Foundation
 // Called by ViewModel to inform Coordinator about navigation actions
 protocol HomeListCoordinatorDelegate: AnyObject {
     func didSelectShow(showId: Int)
+    func didSelectEpisode(episode: Episode, show: ShowDetails)
 }
 // Called by ViewModel to inform ViewController about data changes
 protocol HomeListViewModelDelegate: AnyObject {

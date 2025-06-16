@@ -31,8 +31,15 @@ extension HomeListCoordinator: HomeListCoordinatorDelegate {
         let model = DetailsManager()
         model.id = showId
         let viewModel = ShowDetailsViewModel(service: MazeService(), model: model)
+        viewModel.coordinatorDelegate = self
         let viewController = ShowDetailsViewController(viewModel: viewModel)
         viewModel.delegate = viewController
+        navigationController.pushViewController(viewController, animated: true)
+    }
+
+    func didSelectEpisode(episode: Episode, show: ShowDetails) {
+        let viewModel = EpisodeDetailsViewModel(episode: episode, show: show)
+        let viewController = EpisodeDetailsViewController(viewModel: viewModel)
         navigationController.pushViewController(viewController, animated: true)
     }
 }

@@ -75,7 +75,7 @@ extension SearchViewController: UITableViewDataSource {
               let item = viewModel?.getItem(at: indexPath.row) else {
             return UITableViewCell()
         }
-        cell.configure(imageURL: item.item.image?.medium ?? "", title: item.item.name, isFavorite: nil)
+        cell.configure(imageURL: item.item.image?.medium ?? "", title: item.item.name)
         return cell
     }
 

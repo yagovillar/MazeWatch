@@ -13,6 +13,23 @@ final class ShowOrEpisodeDetailView: UIView {
     
     var onSeasonButtonTap: (() -> Void)?
 
+    // MARK: - Background Components
+
+    private let backgroundImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    
+    private let darkOverlayView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
     // MARK: - UI Components
 
     let titleLabel: UILabel = {
@@ -62,7 +79,6 @@ final class ShowOrEpisodeDetailView: UIView {
     
     private let pickerView = UIPickerView()
 
-
     // MARK: - Init
 
     override init(frame: CGRect) {
@@ -79,10 +95,9 @@ final class ShowOrEpisodeDetailView: UIView {
 
     func configureForShow(_ show: ShowDetails) {
         DispatchQueue.main.async {
-            
             self.titleLabel.text = show.name
-            self.subtitleLabel.text = show.schedule.days.joined(separator: ", ") + (show.schedule.time.isEmpty ? "" : "\(show.schedule.time)")
-            
+            self.subtitleLabel.text = show.schedule.days.joined(separator: ", ") + (show.schedule.time.isEmpty ? " " : "\(show.schedule.time)")
+
             self.genresStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
             for genre in show.genres {
                 let label = UILabel()
@@ -98,18 +113,27 @@ final class ShowOrEpisodeDetailView: UIView {
 
             self.summaryLabel.text = show.summary?.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
             self.seasonButton.isHidden = false
+            self.episodeTableView.isHidden = false
+            self.setBackgroundImage(show.image?.medium ?? "")
+            self.setupEpisodeTableViewConstraints()
         }
     }
 
     func configureForEpisode(_ episode: Episode, show: ShowDetails) {
         DispatchQueue.main.async {
             self.titleLabel.text = show.name
-            self.subtitleLabel.text = nil
+            self.subtitleLabel.text = "Season \(episode.season ?? 0) x Episode \(episode.number ?? 0)"
             self.genresStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
             self.summaryLabel.text = episode.summary?.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
             self.seasonButton.isHidden = true
             self.episodeTableView.isHidden = true
+            self.setBackgroundImage(episode.image?.medium ?? "")
+        }
+    }
 
+    func setBackgroundImage(_ imageURL: String) {
+        ImageLoader.shared.load(from: imageURL) { [weak self] image in
+            self?.backgroundImageView.image = image
         }
     }
 }
@@ -118,6 +142,9 @@ final class ShowOrEpisodeDetailView: UIView {
 
 extension ShowOrEpisodeDetailView: ViewCode {
     func buildViewHierarchy() {
+        addSubview(backgroundImageView)
+        addSubview(darkOverlayView)
+
         addSubview(titleLabel)
         addSubview(subtitleLabel)
         addSubview(genresStack)
@@ -127,28 +154,41 @@ extension ShowOrEpisodeDetailView: ViewCode {
     }
 
     func setupConstraints() {
+        setupBackgroundConstraints()
         setupTitleLabelConstraints()
         setupSubtitleLabelConstraints()
         setupGenresStackConstraints()
         setupSummaryLabelConstraints()
         setupSeasonButtonConstraints()
-        setupEpisodeTableViewConstraints()
     }
 
     func setupAdditionalConfiguration() {
-        backgroundColor = .background
+        backgroundColor = .black
         seasonButton.addTarget(self, action: #selector(seasonButtonTapped), for: .touchUpInside)
     }
     
     @objc private func seasonButtonTapped() {
         onSeasonButtonTap?()
     }
-
 }
 
 // MARK: - Constraints Helpers
 
 private extension ShowOrEpisodeDetailView {
+
+    func setupBackgroundConstraints() {
+        NSLayoutConstraint.activate([
+            backgroundImageView.topAnchor.constraint(equalTo: topAnchor),
+            backgroundImageView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            backgroundImageView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            backgroundImageView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            
+            darkOverlayView.topAnchor.constraint(equalTo: topAnchor),
+            darkOverlayView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            darkOverlayView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            darkOverlayView.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
+    }
 
     func setupTitleLabelConstraints() {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -197,6 +237,7 @@ private extension ShowOrEpisodeDetailView {
     }
 
     func setupEpisodeTableViewConstraints() {
+        episodeTableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             episodeTableView.topAnchor.constraint(equalTo: seasonButton.bottomAnchor, constant: 16),
             episodeTableView.leadingAnchor.constraint(equalTo: leadingAnchor),

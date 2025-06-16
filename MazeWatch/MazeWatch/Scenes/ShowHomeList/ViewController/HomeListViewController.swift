@@ -54,7 +54,7 @@ extension HomeListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ShowCell", for: indexPath) as? MazeListCell
         let show = viewModel.getShow(at: indexPath.row)
-        cell?.configure(imageURL: show.image?.medium ?? "", title: show.name, isFavorite: false)
+        cell?.configure(imageURL: show.image?.medium ?? "", title: show.name)
         return cell ?? UITableViewCell()
     }
 

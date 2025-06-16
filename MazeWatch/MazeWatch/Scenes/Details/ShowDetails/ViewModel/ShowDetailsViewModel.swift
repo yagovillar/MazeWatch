@@ -16,12 +16,14 @@ protocol ShowDetailsViewModelProtocol: AnyObject {
     func selectSeason(_ season: Int)
     func fetchShowDetails()
     func getDetails() -> ShowDetails
+    func selectEpisode(episode at: Int)
 }
 
 class ShowDetailsViewModel: ShowDetailsViewModelProtocol {
     var service: MazeServiceProtocol
     let model: DetailsManagerProtocol
     weak var delegate: ShowDetailsViewModelDelegate?
+    weak var coordinatorDelegate: HomeListCoordinatorDelegate?
 
     init(service: MazeServiceProtocol, model: DetailsManagerProtocol, delegate: ShowDetailsViewModelDelegate? = nil) {
         self.service = service
@@ -66,6 +68,11 @@ class ShowDetailsViewModel: ShowDetailsViewModelProtocol {
     func getEpisode(at index: Int) -> Episode? {
         let episodesList = model.getEpisodesList()
         return episodesList?[index]
+    }
+    
+    func selectEpisode(episode at: Int) {
+        guard let episode = model.getEpisodesList()?[at] else { return }
+        coordinatorDelegate?.didSelectEpisode(episode: episode, show: model.getDetails())
     }
 
 }

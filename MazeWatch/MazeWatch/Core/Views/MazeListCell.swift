@@ -7,6 +7,11 @@
 import UIKit
 
 class MazeListCell: UITableViewCell, ViewCode {
+    
+    func setupAdditionalConfiguration() {
+        //
+    }
+    
 
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -15,19 +20,6 @@ class MazeListCell: UITableViewCell, ViewCode {
         label.numberOfLines = 2
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
-    }()
-
-    private let favoriteButton: UIButton = {
-        let button = UIButton()
-        button.isSelected = false
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.configurationUpdateHandler = { button in
-            var config = UIButton.Configuration.plain()
-            config.image = button.isSelected ? UIImage(systemName: "star.fill") : UIImage(systemName: "star")
-            config.baseForegroundColor = .accent
-            button.configuration = config
-        }
-        return button
     }()
 
     private let cellImageView: UIImageView = {
@@ -62,7 +54,6 @@ class MazeListCell: UITableViewCell, ViewCode {
     func buildViewHierarchy() {
         contentView.addSubview(containerView)
         containerView.addSubview(titleLabel)
-        containerView.addSubview(favoriteButton)
         containerView.addSubview(cellImageView)
     }
 
@@ -76,12 +67,7 @@ class MazeListCell: UITableViewCell, ViewCode {
 
             titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             titleLabel.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
-            titleLabel.trailingAnchor.constraint(equalTo: favoriteButton.leadingAnchor, constant: -12),
-
-            favoriteButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
-            favoriteButton.widthAnchor.constraint(equalToConstant: 32),
-            favoriteButton.heightAnchor.constraint(equalToConstant: 32),
-            favoriteButton.trailingAnchor.constraint(equalTo: cellImageView.leadingAnchor, constant: -12),
+            titleLabel.trailingAnchor.constraint(equalTo: cellImageView.leadingAnchor, constant: -24),
 
             cellImageView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -12),
             cellImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
@@ -90,19 +76,8 @@ class MazeListCell: UITableViewCell, ViewCode {
         ])
     }
 
-    func setupAdditionalConfiguration() {
-        favoriteButton.addAction(UIAction { [weak self] _ in
-            self?.favoriteButton.isSelected.toggle()
-        }, for: .touchUpInside)
-    }
-
-    func configure(imageURL: String, title: String, isFavorite: Bool?) {
+    func configure(imageURL: String, title: String) {
         self.titleLabel.text = title
-        if let isFavorite = isFavorite {
-            self.favoriteButton.isSelected = isFavorite
-        } else {
-            self.favoriteButton.isHidden = true
-        }
         ImageLoader.shared.load(from: imageURL) { [weak self] image in
             self?.cellImageView.image = image
         }
@@ -112,6 +87,6 @@ class MazeListCell: UITableViewCell, ViewCode {
 @available(iOS 17.0, *)
 #Preview {
     let cell = MazeListCell()
-    cell.configure(imageURL: "", title: "The Witcher", isFavorite: true)
+    cell.configure(imageURL: "", title: "The Witcher")
     return cell
 }

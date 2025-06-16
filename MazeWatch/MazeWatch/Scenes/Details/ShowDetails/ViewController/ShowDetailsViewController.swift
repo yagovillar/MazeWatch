@@ -31,7 +31,6 @@ class ShowDetailsViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        self.detailsView.episodeTableView.reloadData()
     }
     
     private func setupData() {
@@ -44,6 +43,7 @@ class ShowDetailsViewController: UIViewController {
         }
 
         detailsView.episodeTableView.dataSource = self
+        detailsView.episodeTableView.delegate = self
         detailsView.episodeTableView.register(MazeListCell.self, forCellReuseIdentifier: "ShowCell")
     }
     
@@ -71,7 +71,7 @@ class ShowDetailsViewController: UIViewController {
 
 }
 
-extension ShowDetailsViewController: UITableViewDataSource {
+extension ShowDetailsViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return viewModel.getEpisodesCount()
     }
@@ -80,16 +80,12 @@ extension ShowDetailsViewController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ShowCell", for: indexPath) as? MazeListCell
         guard let episode = viewModel.getEpisode(at: indexPath.row) else { return UITableViewCell() }
         let episodeName = "\(episode.number ?? 0) - \(episode.name ?? "")"
-        cell?.configure(imageURL: episode.image?.medium ?? "", title: episodeName, isFavorite: nil)
+        cell?.configure(imageURL: episode.image?.medium ?? "", title: episodeName)
         return cell ?? UITableViewCell()
     }
 
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 100
-    }
-
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        //
+        viewModel.selectEpisode(episode: indexPath.row)
     }
 
 }
@@ -116,6 +112,9 @@ extension ShowDetailsViewController: ShowDetailsViewModelDelegate {
     
     func didGetDetaisl() {
         self.detailsView.configureForShow(viewModel.getDetails())
+        DispatchQueue.main.async {
+            self.detailsView.episodeTableView.reloadData()
+        }
         GlobalLoader.shared.hide()
     }
 }
